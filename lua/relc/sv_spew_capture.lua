@@ -7,7 +7,17 @@ local spewCollection = RelC.Queue(20)
 --	This sounds like a party prostitue, doesn't it?
 --	Can take 20 loads by default. Lovely, isn't it?
 
+local lastColor = nil
+
+
+
 RelC.Hooks.Add("EngineSpew", "Capture Spew", function(typ, msg, group, level)
+	if lastColor then
+		spewCollection:Queue(lastColor)
+
+		lastColor = nil
+	end
+
 	--BroadcastChatText("Added spew: ", msg)
 	spewCollection:Queue(msg)
 end, true)
@@ -123,7 +133,7 @@ end
 
 
 function print(...)
-	spewCollection:Queue(colors.print)
+	lastColor = colors.print
 
 	if not RelC.HasEngineSpew then
 		spewCollection:Queue(table_concat({...}, "\t"))
@@ -134,7 +144,7 @@ function print(...)
 end
 
 function Msg(...)
-	spewCollection:Queue(colors.Msg)
+	lastColor = colors.Msg
 
 	if not RelC.HasEngineSpew then
 		spewCollection:Queue(table_concat({...}))
@@ -144,7 +154,7 @@ function Msg(...)
 end
 
 function MsgN(...)
-	spewCollection:Queue(colors.Msg)
+	lastColor = colors.Msg
 
 	if not RelC.HasEngineSpew then
 		spewCollection:Queue(table_concat({...}))
@@ -155,7 +165,7 @@ function MsgN(...)
 end
 
 function MsgC(col, ...)
-	spewCollection:Queue(col or colors.MsgC)
+	lastColor = col or colors.MsgC
 
 	if not RelC.HasEngineSpew then
 		spewCollection:Queue(table_concat({...}))
