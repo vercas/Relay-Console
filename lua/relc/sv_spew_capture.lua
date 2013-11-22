@@ -39,7 +39,7 @@ end
 local sendAmount, throttleAmount, minimumAmount = 200, 10, 100
 
 local function acquire()
-	local ret, len, piece, last = {}, 0
+	local ret, len, piece, last, lastIsColor = {}, 0
 
 	while (not spewCollection:IsEmpty()) and len < sendAmount do
 		piece = spewCollection:Peek()
@@ -54,7 +54,7 @@ local function acquire()
 			end
 
 			if type(last) == "string" then
-				ret[#ret] = { _CONCAT = true, last, piece }
+				ret[#ret] = { [-1] = true, last, piece }
 			elseif type(last) == "table" and last._CONCAT then
 				last[#last+1] = piece
 			else
@@ -62,6 +62,8 @@ local function acquire()
 			end
 
 			len = len + #piece
+
+			lastIsColor = false
 		elseif type(piece) == "table" then
 			spewCollection:Dequeue()
 
@@ -71,6 +73,8 @@ local function acquire()
 				else
 					ret[#ret+1] = piece
 				end
+
+				lastIsColor = true
 			end
 		end
 
@@ -84,12 +88,12 @@ local function acquire()
 	end
 
 	for i = 1, #ret do
-		if type(ret[i]) == "table" and ret[i]._CONCAT then
+		if type(ret[i]) == "table" and ret[i][-1] then
 			ret[i] = table_concat(ret[i])
 		end
 	end
 
-	return ret
+	return ret, (not lastIsColor) and spewCollection:IsEmpty()
 end
 
 
@@ -97,12 +101,16 @@ end
 local hook_relayConsoleSpewTransmit = RelC.Hooks.Call.SpewTransmit
 
 RelC.Hooks.Add("GamemodeThink", "Dispatch Spew", function()
-	local str = acquire()
+	local str, noColor = acquire()
 
 	if #str > 0 then
 		local plys = getPlayers()
 
 		hook_relayConsoleSpewTransmit(plys, str)
+
+		if noColor then
+			lastColor = Color(255, 255, 255, 255)
+		end
 	end
 end, true)
 
