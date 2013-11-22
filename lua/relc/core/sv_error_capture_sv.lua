@@ -40,7 +40,10 @@ local function acquire()
 	while not errorCollection:IsEmpty() do
 		local err = errorCollection:Dequeue()
 
-		--	Will do something with this error. :V
+		ret[#ret+1] = err
+
+		--	Will do something with this error. :V\
+		--	I forgot what I had to do.. *facepalms*
 	end
 
 	return ret

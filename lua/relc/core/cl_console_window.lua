@@ -109,7 +109,7 @@ function PANEL:Init()
 	else
 		self.lblTitle:SetVisible(false)
 
-		tabs_left_offset = 4
+		tabs_left_offset = 5
 	end
 
 	self:DockPadding(5, 5, 5, 5)
@@ -136,10 +136,11 @@ function PANEL:Init()
 
 	tabs:Dock(FILL)
 
-	self.RCon = Create("RelC_Rcon_Panel", self)
-	--self.RCon:OnVisible()
-
+	self.RCon = Create("RelC_RCon_Panel", self)
 	tabs:AddSheet("RCon", self.RCon, "icon16/server.png")
+
+	self.ErrSv = Create("RelC_Error_List", self)
+	tabs:AddSheet("Server Errors", self.ErrSv, "icon16/bug.png")
 
 	self:SetSize(ScrW() * 0.6, ScrH() * 0.7)
 	--self:SetPos(ScrW() * 0.4 - 50, 50)
@@ -212,7 +213,7 @@ end
 
 if IsValid(_G.RelayConsole_Window) then
 	_G.RelayConsole_Window:Remove()
-	_create()
+	--_create()
 	_check()
 end
 
@@ -220,7 +221,7 @@ end
 
 timer.Simple(0, function()
 	if not IsValid(_G.RelayConsole_Window) then
-		_create()
+		--_create()
 		_check()
 	end
 end)

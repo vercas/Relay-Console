@@ -93,7 +93,8 @@ RelC.Hooks.Add("RConReceived", "Execution", function(ply, cmd)
 
 	for i = 1, #plys do
 		if plys[i] == ply then
-			runMultipleCommands(cmd)
+			--runMultipleCommands(cmd)
+			game.ConsoleCommand(cmd .. "\n")
 
 			break
 		end

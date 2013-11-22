@@ -1,0 +1,79 @@
+local hasEngineSpew, engineSpew = pcall(require, "enginespew")
+local hasLuaError, luaError = pcall(require, "luaerror2")
+
+
+
+RelC.HasEngineSpew = hasEngineSpew
+RelC.HasLuaError = hasLuaError
+
+
+
+local hook_engineSpew = RelC.Hooks.Call.EngineSpew
+local hook_luaErrorSV = RelC.Hooks.Call.ServerLuaError
+local hook_luaErrorCL = RelC.Hooks.Call.ClientLuaError
+
+
+
+if hasEngineSpew then
+	local spewing, queue = false, RelC.Queue(20)
+
+	hook.Add("EngineSpew", "Relay Console", function(msgType, msgText, msgGroup, msgLevel)
+		if spewing then
+			queue:Queue({ msgType, msgText, msgGroup, msgLevel })
+		else
+			spewing = true
+
+			hook_engineSpew(msgType, msgText, msgGroup, msgLevel)
+
+			spewing = false
+		end
+	end)
+
+	hook.Add("Think", "Relay Console EngineSpew Decongestion", function()
+		while not queue:IsEmpty() do
+			spewing = true
+
+			hook_engineSpew(unpack(queue:Dequeue()))
+
+			spewing = false
+		end
+	end)
+end
+
+if hasLuaError then
+	local catching, queue = false, RelC.Queue(20)
+
+	hook.Add("LuaError", "Relay Console", function(serverside, err, stack)
+		--[[if not stack then
+			print("stack is ", type(stack), " ", tostring(stack))
+			local _stack, _thesaurus, _newthesaurus = RelC.Utils.AcquireStack(3)
+			stack = _stack
+		end--]]
+
+		if catching then
+			queue:Queue({ err, stack })
+		else
+			catching = true
+
+			hook_luaErrorSV(err, stack)
+
+			catching = false
+		end
+	end)
+
+	hook.Add("Think", "Relay Console LuaError Decongestion", function()
+		while not queue:IsEmpty() do
+			catching = true
+
+			hook_luaErrorSV(unpack(queue:Dequeue()))
+
+			catching = false
+		end
+	end)
+
+
+
+	hook.Add("ClientLuaError", "Relay Console", function(ply, err)
+		hook_luaErrorCL(ply, err)
+	end)
+end

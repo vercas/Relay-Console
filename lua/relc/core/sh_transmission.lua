@@ -25,6 +25,11 @@ if SERVER then
 		net.WriteInt(type, 32)
 		net.WriteTable(data)
 		net.Send(plys)
+
+		--[[if type ~= TYPE_SPEW then
+			MsgN("Sending data of type ", type, ":")
+			PrintTable(data, 1)
+		end--]]
 	end
 
 	local hook_relayConsoleRConReceived = RelC.Hooks.Call.RConReceived

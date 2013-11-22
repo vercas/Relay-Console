@@ -182,4 +182,4 @@ function PANEL:OnClose()
 	--	Should save position and size and active tab?
 end
 
-vgui.Register("RelC_Rcon_Panel", PANEL, "Panel")
+vgui.Register("RelC_RCon_Panel", PANEL, "Panel")

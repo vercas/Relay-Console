@@ -2,6 +2,10 @@ local string_sub, string_find, unpack = string.sub, string.find, unpack
 
 
 
+local error_color = Color(255, 100, 0, 255)
+
+
+
 --	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--	--
 --	Parses Lua sort of like the Lua command line interpreter would.
 local function runCommand(cmd)
@@ -11,7 +15,13 @@ local function runCommand(cmd)
 		cmd = "print(" .. string_sub(cmd, b + 1) .. ")"
 	end
 
-	(CompileString or loadstring)(cmd, "Relay Console LuaSV chunk")()
+	local res = (CompileString or loadstring)(cmd, "Relay Console LuaSV chunk", true)
+
+	if type(res) == "function" then
+		res()
+	else
+		MsgC(error_color, "Error: ", tostring(res))
+	end
 end
 
 

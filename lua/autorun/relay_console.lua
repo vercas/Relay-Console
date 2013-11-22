@@ -246,10 +246,18 @@ IMsg(false)
 
 
 
-IMsg("Including code files:")
+IMsg("Including singularity files:")
 
 IMsg(false)
-vinclude("relc")
+vinclude("relc/singularity")
+IMsg(false)
+
+
+
+IMsg("Including core files:")
+
+IMsg(false)
+vinclude("relc/core")
 IMsg(false)
 
 
