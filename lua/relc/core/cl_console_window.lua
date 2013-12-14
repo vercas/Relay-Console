@@ -77,7 +77,11 @@ local function ThinkMovement(self)
 	end
 end
 
+
+
 local PANEL = { }
+
+
 
 function PANEL:Init()
 	--self:SetSkin("vAdmin skin")
@@ -109,7 +113,7 @@ function PANEL:Init()
 	else
 		self.lblTitle:SetVisible(false)
 
-		tabs_left_offset = 5
+		tabs_left_offset = 6
 	end
 
 	self:DockPadding(5, 5, 5, 5)
@@ -139,8 +143,8 @@ function PANEL:Init()
 	self.RCon = Create("RelC_RCon_Panel", self)
 	tabs:AddSheet("RCon", self.RCon, "icon16/server.png")
 
-	self.ErrSv = Create("RelC_Error_List", self)
-	tabs:AddSheet("Server Errors", self.ErrSv, "icon16/bug.png")
+	self.ErrSv = Create("RelC_Server_Errors_Panel", self)
+	tabs:AddSheet("Server Errors", self.ErrSv, "icon16/error.png")
 
 	self:SetSize(ScrW() * 0.6, ScrH() * 0.7)
 	--self:SetPos(ScrW() * 0.4 - 50, 50)
@@ -169,6 +173,8 @@ end
 function PANEL:OnClose()
 	--	Should save position and size and active tab?
 end
+
+
 
 if vFrame then
 	vgui.Register("RelC_Console_Window", PANEL, "vFrame")

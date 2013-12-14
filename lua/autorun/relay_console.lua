@@ -72,7 +72,7 @@ IMsg("Initializing Relay Console...")
 IMsg(true)
 
 
-local GAMEPAT = ""
+local GAMEPAT = "relc"
 local currentDir=GAMEPAT
 local dirDeepness=0
 local lineWidth=75
@@ -249,7 +249,7 @@ IMsg(false)
 IMsg("Including singularity files:")
 
 IMsg(false)
-vinclude("relc/singularity")
+vinclude("singularity")
 IMsg(false)
 
 
@@ -257,7 +257,7 @@ IMsg(false)
 IMsg("Including core files:")
 
 IMsg(false)
-vinclude("relc/core")
+vinclude("core")
 IMsg(false)
 
 

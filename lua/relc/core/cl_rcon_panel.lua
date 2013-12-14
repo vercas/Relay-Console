@@ -104,7 +104,7 @@ function PANEL:Init()
 		if code == KEY_ENTER then
 			input:OnKeyCode(code)
 
-			if self.send.DoClick then
+			if (not self.send:GetDisabled()) and self.send.DoClick then
 				self.send:DoClick()
 			end
 		else
@@ -132,21 +132,17 @@ function PANEL:Init()
 
 	RelC.Hooks.Add("SpewReceived", "RCon Spew Display", function(data)
 		if IsValid(self) and IsValid(self.output) then
-			for i = 1, #data do
-				local d = data[i]
+			if self.on then
+				self:AddData(data)
 
-				if type(d) == "string" then
-					self.output:AppendText(d)
-				elseif type(d) == "table" then
-					if d.url then
-						--
-					elseif d.r then
-						self.output:InsertColorChange(d.r, d.g, d.b, d.a)
-					end
+				self.output:GotoTextEnd()
+			else
+				local cnt = #self.queue
+				
+				for i = 1, #data do
+					self.queue[cnt + i] = data[i]
 				end
 			end
-
-			self.output:GotoTextEnd()
 		end
 	end, true)
 
@@ -165,6 +161,8 @@ function PANEL:Init()
 	end
 end
 
+
+
 function PANEL:Think()
 	if self.PostInit then
 		local func = self.PostInit
@@ -174,12 +172,43 @@ function PANEL:Think()
 	end
 end
 
-function PANEL:OnVisible()
-	--
+
+
+function PANEL:PauseChanged()
+	self.send:SetDisabled(not self.on)
+
+	if self.on and #self.queue > 0 then
+		self:AddData(self.queue)
+		self.queue = {}
+
+		self.output:GotoTextEnd()
+	end
 end
 
-function PANEL:OnClose()
-	--	Should save position and size and active tab?
+
+
+function PANEL:Clear()
+	if IsValid(self.output) then
+		self.output:SetText("")
+	end
 end
 
-vgui.Register("RelC_RCon_Panel", PANEL, "Panel")
+function PANEL:AddData(data)
+	for i = 1, #data do
+		local d = data[i]
+
+		if type(d) == "string" then
+			self.output:AppendText(d)
+		elseif type(d) == "table" then
+			if d.url then
+				--
+			elseif d.r then
+				self.output:InsertColorChange(d.r, d.g, d.b, d.a)
+			end
+		end
+	end
+end
+
+
+
+vgui.Register("RelC_RCon_Panel", PANEL, "RelC_Panel_Base")

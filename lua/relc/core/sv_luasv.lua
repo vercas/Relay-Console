@@ -11,7 +11,7 @@ local error_color = Color(255, 100, 0, 255)
 local function runCommand(cmd)
 	local a, b = string_find(cmd, "%s*=%s*")
 
-	if a and b then
+	if b and a == 1 then
 		cmd = "print(" .. string_sub(cmd, b + 1) .. ")"
 	end
 
@@ -19,8 +19,8 @@ local function runCommand(cmd)
 
 	if type(res) == "function" then
 		res()
-	else
-		MsgC(error_color, "Error: ", tostring(res))
+	elseif res then
+		MsgC(error_color, "Error: ", tostring(res), "\n")
 	end
 end
 
