@@ -1,4 +1,8 @@
---if true then return end
+if true then return end
+--	To do: Make this some sort of setting.
+
+
+
 local MsgC = MsgC
 
 

@@ -14,7 +14,8 @@ hook.Add("PlayerAuthed", "Relay Console", function(ply, steamID, uniqueID)
 end)
 
 hook.Add("EntityRemoved", "Relay Console", function(ent)
-	hook_entityRemoved(ent)
+	--	hook_entityRemoved(ent)
+	--	Yet unused.
 
 	if ent:IsPlayer() then
 		hook_playerLeft(ent, ent:SteamID64(), ent:SteamID())
