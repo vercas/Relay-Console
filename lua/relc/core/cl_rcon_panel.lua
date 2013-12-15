@@ -76,6 +76,8 @@ function PANEL:Init()
 		self.input:SetCaretPos(0)
 		self.input:SetText("")
 
+		self.send:SetDisabled(true)
+
 		self.input:AddHistory(txt)
 
 		self.output:InsertColorChange(180, 180, 180, 255)
