@@ -76,7 +76,7 @@ function PANEL:Init()
 		self.input:SetCaretPos(0)
 		self.input:SetText("")
 
-		self.send:SetDisabled(true)
+		self.input:OnChange()
 
 		self.input:AddHistory(txt)
 
@@ -120,6 +120,15 @@ function PANEL:Init()
 		local enabled = value and #value > 0
 
 		self.send:SetDisabled(not enabled)
+	end
+
+	--	Dear Garry. Have a cookie, and then try to fix this. :3
+	local ufh = self.input.UpdateFromHistory
+
+	function self.input.UpdateFromHistory(input)
+		ufh(input)
+
+		input:OnChange()
 	end
 
 

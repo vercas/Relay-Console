@@ -140,11 +140,21 @@ end
 
 
 
+local function concat(tab, sep)
+	for i = 1, #tab do
+		tab[i] = tostring(tab[i])
+	end
+
+	return table_concat(tab, sep)
+end
+
+
+
 function print(...)
 	lastColor = colors.print
 
 	if not RelC.HasEngineSpew then
-		spewCollection:Queue(table_concat({...}, "\t"))
+		spewCollection:Queue(concat({...}, "\t"))
 		spewCollection:Queue("\n")
 	end
 
@@ -155,7 +165,7 @@ function Msg(...)
 	lastColor = colors.Msg
 
 	if not RelC.HasEngineSpew then
-		spewCollection:Queue(table_concat({...}))
+		spewCollection:Queue(concat({...}))
 	end
 
 	oldFuncs.Msg(...)
@@ -165,7 +175,7 @@ function MsgN(...)
 	lastColor = colors.Msg
 
 	if not RelC.HasEngineSpew then
-		spewCollection:Queue(table_concat({...}))
+		spewCollection:Queue(concat({...}))
 		spewCollection:Queue("\n")
 	end
 
@@ -176,7 +186,7 @@ function MsgC(col, ...)
 	lastColor = col or colors.MsgC
 
 	if not RelC.HasEngineSpew then
-		spewCollection:Queue(table_concat({...}))
+		spewCollection:Queue(concat({...}))
 	end
 
 	oldFuncs.MsgC(col, ...)
