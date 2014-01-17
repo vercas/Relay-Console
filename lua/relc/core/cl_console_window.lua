@@ -191,6 +191,10 @@ local menuOn, con = nil, nil
 
 
 
+local hook_relayConsoleTryCanShow = RelC.Hooks.Call.TryCanShow
+
+
+
 local function _create()
 	con = Create("RelC_Console_Window")
 	_G.RelayConsole_Window = con
@@ -203,7 +207,7 @@ local function _check()
 		menuOn = isVis
 
 		if not IsValid(con) then
-			_create()
+			return
 		end
 
 		if isVis then
@@ -220,7 +224,7 @@ end
 if IsValid(_G.RelayConsole_Window) then
 	_G.RelayConsole_Window:Remove()
 	--_create()
-	_check()
+	hook_relayConsoleTryCanShow()
 end
 
 
@@ -228,10 +232,33 @@ end
 timer.Simple(0, function()
 	if not IsValid(_G.RelayConsole_Window) then
 		--_create()
-		_check()
+		hook_relayConsoleTryCanShow()
 	end
 end)
 
 
 
 RelC.Hooks.Add("GamemodeThink", "Window Checks", _check, true)
+
+
+
+RelC.Hooks.Add("ShowConsole", "Console Display", function()
+	if IsValid(con or _G.RelayConsole_Window) then
+		return
+	end
+
+	con = Create("RelC_Console_Window")
+	_G.RelayConsole_Window = con
+	menuOn = not isVisible()
+
+	_check()
+end, true)
+
+
+RelC.Hooks.Add("HideConsole", "Console Removal", function()
+	local win = (con or _G.RelayConsole_Window)
+
+	if win then
+		win:Remove()
+	end
+end, true)
