@@ -87,6 +87,9 @@ if SERVER then
 			end
 
 			sendData(ply, TYPE_ERRORSV, newErrs)
+
+			--MsgC(Color(255, 255, 0), "Sending error table to ", tostring(ply), ":\n")
+			--PrintTable(newErrs)
 		end
 	end, true)
 

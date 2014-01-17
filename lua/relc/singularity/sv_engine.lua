@@ -50,8 +50,18 @@ if hasLuaError then
 			stack = _stack
 		end--]]
 
+		if type(err) ~= "string" or type(stack) ~= "table" then
+			MsgC(Color(255, 0, 0), "Messed up error: ")
+			MsgN("(", type(err), ") ", tostring(err), " - ", "(", type(stack), ") ", tostring(stack))
+
+			return
+		end
+
 		if catching then
 			queue:Queue({ err, stack })
+
+			MsgC(Color(255, 0, 0), "Capture error that would cause infinite recursion:\n")
+			PrintTable({ err, stack })
 		else
 			catching = true
 

@@ -40,7 +40,16 @@ end
 
 function PANEL:AddData(data)
 	for i = 1, #data do
-		self.errs:LuaError("server", data[i][2][1], data[i][2][2])
+		--[[if not data[i][2][2] then
+			MsgC(Color(255, 0, 0), "Weird error:\n")
+			MsgN(tostring(data[i][2][1]))
+
+			MsgN()
+
+			PrintTable(data)
+		end--]]
+
+		self.errs:LuaError("server", data[i][2][1], data[i][2][2] or {})
 	end
 end
 

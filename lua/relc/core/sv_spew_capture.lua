@@ -4,8 +4,7 @@ local type = type
 
 
 local spewCollection = RelC.Queue(20)
---	This sounds like a party prostitue, doesn't it?
---	Can take 20 loads by default. Lovely, isn't it?
+--	I'll refrain from commenting this time.
 
 local lastColor = nil
 
