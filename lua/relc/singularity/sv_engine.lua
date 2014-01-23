@@ -50,11 +50,13 @@ if hasLuaError then
 			stack = _stack
 		end--]]
 
-		if type(err) ~= "string" or type(stack) ~= "table" then
+		if type(err) ~= "string" or (stack ~= nil and type(stack) ~= "table") then
 			MsgC(Color(255, 0, 0), "Messed up error: ")
 			MsgN("(", type(err), ") ", tostring(err), " - ", "(", type(stack), ") ", tostring(stack))
 
 			return
+		elseif stack == nil then
+			stack = {}
 		end
 
 		if catching then
