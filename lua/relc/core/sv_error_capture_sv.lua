@@ -1,20 +1,8 @@
-local string_sub, table_concat = string.sub, table.concat
-
-
-
 local errorCollection = RelC.Queue(20)
 
 
 
 RelC.Hooks.Add("ServerLuaError", "Capture Server Error", function(err, stack)
-	--[[if stack and type(stack) == "table" then
-		MsgN("STACK:")
-		PrintTable(stack, 1)
-		MsgN()
-	else
-		MsgN("No stack!\n")
-	end--]]
-
 	errorCollection:Queue({ err, stack })
 end, true)
 
@@ -32,8 +20,6 @@ end
 
 
 
-local thesaurus = { }
-
 local function acquire()
 	local ret = { }
 
@@ -42,8 +28,7 @@ local function acquire()
 
 		ret[#ret+1] = err
 
-		--	Will do something with this error. :V\
-		--	I forgot what I had to do.. *facepalms*
+		--	It seems that nothing has to be done here.
 	end
 
 	return ret
@@ -62,7 +47,3 @@ RelC.Hooks.Add("GamemodeThink", "Process and Dispatch Server Errors", function()
 		hook_relayConsoleServerErrorsTransmit(plys, errs)
 	end
 end, true)
-
-
-
-

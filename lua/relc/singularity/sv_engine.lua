@@ -1,3 +1,7 @@
+local DecodeClientsideErrorString = RelC.Utils.DecodeClientsideErrorString
+
+
+
 local hasEngineSpew, engineSpew = pcall(require, "enginespew")
 local hasLuaError, luaError = pcall(require, "luaerror2")
 
@@ -85,7 +89,11 @@ if hasLuaError then
 
 
 
-	hook.Add("ClientLuaError", "Relay Console", function(ply, err)
-		hook_luaErrorCL(ply, err)
+	hook.Add("ClientLuaError", "Relay Console", function(ply, txt)
+		local err, stack = DecodeClientsideErrorString(txt)
+
+		--	Decoding is done here because a better engine interface could provide the necessary data directly.
+
+		hook_luaErrorCL(ply, err, stack)
 	end)
 end
