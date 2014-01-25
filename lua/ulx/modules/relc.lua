@@ -8,11 +8,24 @@ local function spawn()
 
 	local function getAccessHandler(permission)
 		return function(plys)
-			local all = GetAll()
+			local all, ply = GetAll()
 
 			for i = 1, #all do
-				if query(all[i], permission) then
-					plys[#plys+1] = all[i]
+				ply = all[i]
+
+				if query(ply, permission) then
+					local okay = true
+
+					for j = 1, #plys do
+						if plys[j] == ply then
+							okay = false
+							break
+						end
+					end
+
+					if okay then
+						plys[#plys+1] = ply
+					end
 				end
 			end
 		end
