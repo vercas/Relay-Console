@@ -14,20 +14,29 @@ function RelC.Utils.CopyArray(src)
 	return rep
 end
 
+local function copyDictionary(tab, lookup)
+	if not lookup then lookup = {} end
 
-function RelC.Utils.CopyDictionary(src)
-	local rep = {}
+	local new = {}
 
-	for k, v in pairs(src) do
-		if type(v) == "table" then
-			rep[k] = RelC.Utils.CopyDictionary(v)
-		else
-			rep[k] = v
+	lookup[tab] = new
+
+	for k, v in pairs(tab) do
+		if type(k) == "table" then
+			k = lookup[k] or copyDictionary(k, lookup)
 		end
+
+		if type(v) == "table" then
+			v = lookup[v] or copyDictionary(v, lookup)
+		end
+
+		new[k] = v
 	end
 
-	return rep
+	return new
 end
+
+RelC.Utils.CopyDictionary = copyDictionary
 
 
 

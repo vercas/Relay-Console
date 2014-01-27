@@ -58,7 +58,7 @@ local function queuefunc(fnc, functionlist, donefunctions)
 	donefunctions[fnc] = true
 end
 
-function RelC.Utils.AcquireStack(level)
+function RelC.Utils.AcquireStack(level, minimize)
 	if type(level) ~= "number" or level ~= math_floor(level) or level < 1 then
 		error("level must be a strictly positive integer")
 	end
@@ -75,76 +75,98 @@ function RelC.Utils.AcquireStack(level)
 		end
 
 		stack[#stack+1] = info
-		info._stackpos = i
 
-		if info.func then
-			thesaurus[info.func] = info
-			queuefunc(info.func, functionlist, donefunctions)
-			info.func = tostring(info.func)
-		end
+		if minimize then
+			info.func = info.func and tostring(info.func) or nil
+			info.isvararg = nil
+			info.nparams = nil
+			info.nups = nil
 
-		--if info.what == "Lua" then
-		info._locals = {}
-		local locals = info._locals
-
-		local j = 1
-
-		while true do
-			local n, v = debug_getlocal(i, j)
-
-			if not n then break end
-
-			locals[#locals+1] = {name=n,value=v}
-
-			if type(v) == "function" then
-				queuefunc(v, functionlist, donefunctions)
-				locals[#locals].value = tostring(locals[#locals].value)
+			if info.linedefined then
+				info.lastlinedefined = nil
 			end
 
-			j = j + 1
-		end
-		--end
+			if info.currentline then
+				info.linedefined = nil
+			end
 
-		i = i + 1
-	end
-
-	i = 1
-
-	while i <= #functionlist do
-		local fnc = functionlist[i]
-
-		local info
-
-		if thesaurus[fnc] then
-			info = thesaurus[fnc]
-			thesaurus[fnc] = info._stackpos
+			--	This may be deduced.
 		else
-			info = debug_getinfo(fnc)
-			thesaurus[fnc] = info
-		end
+			info._stackpos = i
 
-		local ups = {}
-		info._upvalues = ups
-
-		for j = 1, info.nups do
-			local n, v = debug_getupvalue(fnc, j)
-
-			ups[#ups+1] = {name=n,value=v}
-
-			if type(v) == "function" then
-				queuefunc(v, functionlist, donefunctions)
-				ups[#ups].value = tostring(ups[#ups].value)
+			if info.func then
+				thesaurus[info.func] = info
+				queuefunc(info.func, functionlist, donefunctions)
+				info.func = tostring(info.func)
 			end
+
+			--if info.what == "Lua" then
+			info._locals = {}
+			local locals = info._locals
+
+			local j = 1
+
+			while true do
+				local n, v = debug_getlocal(i, j)
+
+				if not n then break end
+
+				locals[#locals+1] = {name=n,value=v}
+
+				if type(v) == "function" then
+					queuefunc(v, functionlist, donefunctions)
+					locals[#locals].value = tostring(locals[#locals].value)
+				end
+
+				j = j + 1
+			end
+			--end
 		end
 
 		i = i + 1
 	end
 
-	local newthesaurus = {}
+	if not minimize then
+		i = 1
 
-	for k, v in pairs(thesaurus) do
-		newthesaurus[tostring(k)] = v
+		while i <= #functionlist do
+			local fnc = functionlist[i]
+
+			local info
+
+			if thesaurus[fnc] then
+				info = thesaurus[fnc]
+				thesaurus[fnc] = info._stackpos
+			else
+				info = debug_getinfo(fnc)
+				thesaurus[fnc] = info
+			end
+
+			local ups = {}
+			info._upvalues = ups
+
+			for j = 1, info.nups do
+				local n, v = debug_getupvalue(fnc, j)
+
+				ups[#ups+1] = {name=n,value=v}
+
+				if type(v) == "function" then
+					queuefunc(v, functionlist, donefunctions)
+					ups[#ups].value = tostring(ups[#ups].value)
+				end
+			end
+
+			i = i + 1
+		end
+
+		local newthesaurus = {}
+
+		for k, v in pairs(thesaurus) do
+			newthesaurus[tostring(k)] = v
+		end
+
+		return stack, thesaurus, newthesaurus
+	else
+		return stack
 	end
-
-	return stack, thesaurus, newthesaurus
 end
