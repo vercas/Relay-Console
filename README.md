@@ -1,5 +1,5 @@
 # Relay Console
-![screenshot](http://puu.sh/5NmVK.png "screenshot")
+![screenshot 1](http://www.vercas.com/wp-content/uploads/2014/01/Relay-Console-1.png "screenshot 1")
 
 ### Introduction
 Relay console allows server administrators to remotely view and interact with the server console.
