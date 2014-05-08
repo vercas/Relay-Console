@@ -27,7 +27,7 @@ local match, gmatch = string.match, string.gmatch
 function RelC.Utils.DecodeClientsideErrorString(txt)
 	local stack, err = {}, ""
 
-	local path, line, errmsg, stacktrace = match( str, "%[ERROR%] (.-):(.-):%s*(.-)\n*%s*(.+)$" )
+	local path, line, errmsg, stacktrace = match( str, "%[.-%] (.-):(.-):%s*(.-)\n*%s*(.+)$" )
 
 	if not path or not line or not errmsg or not stacktrace then
 		error("Text given does not contain a valid/known error string!")
