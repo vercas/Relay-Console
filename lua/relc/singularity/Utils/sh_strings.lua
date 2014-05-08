@@ -23,49 +23,33 @@ end
 
 
 
-local SplitByLines = RelC.Utils.SplitByLines
-
+local match, gmatch = string.match, string.gmatch
 function RelC.Utils.DecodeClientsideErrorString(txt)
-	local lines, i, err, stack = SplitByLines(txt), 1, nil, {}
+	local stack, err = {}, ""
 
-	--	Skip empty line(s)
-	while #lines[i] == 0 do
-		i = i + 1
-	end
+	local path, line, errmsg, stacktrace = match( str, "%[ERROR%] (.-):(.-):%s*(.-)\n*%s*(.+)$" )
 
-	local a, b, location, errstr = find(lines[i], "%[ERROR%] (.*:[%-%d]*): (.*)")
-
-	if a ~= 1 or b ~= #lines[i] then
+	if not path or not line or not errmsg or not stacktrace then
 		error("Text given does not contain a valid/known error string!")
 	end
 
-	--err = "[" .. location .. "] " .. errstr
-	err = errstr
+	--[[ uncomment this if you want to include the first error in the returned table
+	stack[1] = {
+		source = path,
+		currentline = line,
+		name = ""
+	}
+	]]
 
-	i = i + 1
+	err = errmsg
 
-	--	Skip empty line(s)
-	while #lines[i] == 0 do
-		i = i + 1
-	end
-
-	repeat
-		local a, b, pos, funcname, source, line = find(lines[i], "%s*(%d+)%.%s*(%w*) %- (.+):([%-%d]+)%s*")	--	"  (pos). (funcname) - (source):(line)"
-
-		if a ~= 1 or b ~= #lines[i] or tonumber(pos) ~= (#stack + 1) then
-			break	--	Not a stack thingie.
-		end
-
-		stack[tonumber(pos)] = {
-			name = funcname,
-			source = source,
-			currentline = line
+	for funcname, path, line in gmatch( stacktrace, "%s*%d+%. *(.-) *%- *(.-):(.-)\n" ) do
+		stack[#stack+1] = {
+			source = path,
+			currentline = line,
+			name = funcname
 		}
-
-		i = i + 1
-	until lines[i] == nil or #lines[i] == 0
-
-	--	Beatiful way, isn't it? :D
+	end
 
 	return err, stack
 end
