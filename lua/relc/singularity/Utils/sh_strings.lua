@@ -33,7 +33,7 @@ function RelC.Utils.DecodeClientsideErrorString(txt)
 		i = i + 1
 	end
 
-	local a, b, location, errstr = find(lines[i], "%[ERROR%] (.*:[%-%d]*): (.*)")
+	local a, b, location, errstr = find(lines[i], "%[ERROR%] (.*:[%-%d]*): (.*)")	--	"[ERROR] (source:line): (error text)"
 
 	if a ~= 1 or b ~= #lines[i] then
 		error("Text given does not contain a valid/known error string!")
@@ -59,7 +59,7 @@ function RelC.Utils.DecodeClientsideErrorString(txt)
 		stack[tonumber(pos)] = {
 			name = funcname,
 			source = source,
-			currentline = line
+			currentline = tonumber(line),
 		}
 
 		i = i + 1
@@ -68,4 +68,22 @@ function RelC.Utils.DecodeClientsideErrorString(txt)
 	--	Beatiful way, isn't it? :D
 
 	return err, stack
+end
+
+
+
+if true then return end
+
+if SERVER then
+	local function a()
+		debug.Trace()
+		error "shalalalalalom"
+		return "a" + {}
+	end
+
+	local function b()
+		return a() + "b"
+	end
+
+	timer.Simple(1, b)
 end

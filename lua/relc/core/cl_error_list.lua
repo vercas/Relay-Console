@@ -1,19 +1,22 @@
 local ScrW, ScrH = ScrW, ScrH
 local type, IsValid = type, IsValid
-local format = string.format
+local format, concat = string.format, table.concat
+local timer = timer
 
 
 
 local code = [===[
 <html>
 	<head>
+		<meta charset="UTF-8">
+
 		<style>
 BODY
 {
 	background-color: rgb( 50, 50, 50 );
 	
-	border: 1px solid #000;
-	padding: 5px;
+	/*border: 1px solid #000;
+	padding: 5px;*/
 	margin: 0;
 	word-wrap: break-word;
 }
@@ -28,6 +31,8 @@ BODY, TABLE, TR, TD, PRE
 #console
 {
 	margin-left: 32px;
+	padding: 0px;
+	margin-top: 0px;
 }
 
 .realm_client
@@ -46,14 +51,20 @@ BODY, TABLE, TR, TD, PRE
 	top: 0px;
 	left: 0px;
 	bottom: 0px;
+
 	float: left;
+
 	width: 24px;
+
 	border-radius: 3px;
+
+	padding-top: 4px;
+
 	color: Black;
 	text-align: center;
-	padding-top: 4px;
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: normal;
+
 	letter-spacing: -0px;
 }
 
@@ -70,10 +81,10 @@ BODY, TABLE, TR, TD, PRE
 	position: relative;
 	padding-left: 32px;
 	border-radius: 3px;
-	margin-top: 1px;
-	margin-bottom: 1px;
-	margin-left: -32px;
+	margin: 8px 8px 8px -24px;
 	cursor:pointer;
+
+	font-size: 12px;
 	font-weight: bold;
 }
 
@@ -148,23 +159,25 @@ DIV.TimeStamp
 var LastTime = "";
 var LastError = "";
 var LineCount = 0;
-var MAX_LINES = 500
+var MAX_LINES = 500;
 
 function TimeStamp()
 {
 	var d = new Date();
 	var curr_hour = d.getHours();
 	var curr_min = d.getMinutes();
-	if ( curr_min < 10 ) curr_min = "0" + curr_min
+
+	if ( curr_min < 10 )
+		curr_min = "0" + curr_min;
 	
 	return curr_hour + ":" + curr_min;
 }
 
 function Trim()
 {
-	if ( LineCount < MAX_LINES ) return;
+	if (LineCount < MAX_LINES) return;
 
-	$( '.entry:first' ).remove();
+	$('.entry:first').remove();
 }
 
 function ScrollToBottom()
@@ -181,16 +194,25 @@ function ScrollToBottom()
 	//lua.Run( "ScrollConsoleToBottom()" );
 }
 
-function Print( str, r, g, b, a )
+function Clear()
 {
-	if ( LastTime != TimeStamp() )
+	$('#console').html("");
+	LineCount = 0;
+}
+
+
+
+function Print(str, r, g, b, a)
+{
+	if (LastTime != TimeStamp())
 	{
 		LastTime = TimeStamp();
-		$('#console').append( "<div class=\"TimeStamp\">" + LastTime + "</div>" );
+		$('#console').append("<div class=\"TimeStamp\">" + LastTime + "</div>");
 	}
 
-	var str = str.replace( /\</g, "&lt;" )
-	var str = str.replace( /\>/g, "&gt;" )
+	var str = str.replace( /\</g, "&lt;" );
+	var str = str.replace( /\>/g, "&gt;" );
+
 	$('#console').append( "<span class='entry msg' style='color: rgba( "+r+", "+g+", "+b+", "+(a/255)+" );'>" + str + "</span>" );
 
 	LineCount++;
@@ -198,10 +220,11 @@ function Print( str, r, g, b, a )
 	ScrollToBottom();
 }
 
-function Command( str )
+function Command(str)
 {  
-	var str = str.replace( /\</g, "&lt;" )
-	var str = str.replace( /\>/g, "&gt;" )
+	var str = str.replace( /\</g, "&lt;" );
+	var str = str.replace( /\>/g, "&gt;" );
+
 	$('#console').append( "<div class='entry command');'>" + str + "</div>" );
 
 	LineCount++;
@@ -209,44 +232,45 @@ function Command( str )
 	ScrollToBottom();
 }
 
-function Clear()
-{
-	$('#console').html( "" )
-	LineCount = 0;
-}
 
-function LuaError( realm, errstr ) 
+
+function LuaError(realm, errstr) 
 {
 	// Get the last error
-	if ( LastError == errstr+realm )
+	if (LastError == errstr + realm)
 	{
-		var lasterr = $('.error:last')
+		var lasterr = $('.error:last');
 		var tab = lasterr.find('.tab');
-		var str = tab.html()
-		if ( str == "" ) str = "1";
+		var str = tab.html();
+
+		if (str == "")
+			str = "1";
 		
-		var iNum = parseInt( str ) + 1
-		if ( iNum > 9999 ) iNum = 9999;
+		var iNum = parseInt(str) + 1;
+
+		if (iNum > 9999)
+			iNum = 9999;
 		
-		tab.html( iNum )
+		tab.html(iNum);
 		
 		// Move to the bottom of the stack..
-		lasterr.appendTo( $('#console') );
+		lasterr.appendTo($('#console'));
 		
 		tab.stop();
-		tab.fadeTo( 100, 0.8 ).fadeTo( 50, 1.0 );
-		return;
+		tab.fadeTo(100, 0.8).fadeTo(50, 1.0);
+
+		return false;
 	}
 	
-	LastError = errstr+realm
+	LastError = errstr + realm;
  
-	var original = errstr
+	var original = errstr;
 
 	var line = errstr.match(/\[(.+)\]/gi);
-	if ( line && line[0] )
+	if (line && line[0])
 	{
-		line = line[0].replace(/\\/gi, "/")
-		line = line.replace(/@|\[|\]/gi, "")
+		line = line[0].replace(/\\/gi, "/");
+		line = line.replace(/@|\[|\]/gi, "");
 		errstr = errstr.replace(/\[(.*?)\]/gi, '');
 	}
 	else
@@ -254,40 +278,33 @@ function LuaError( realm, errstr )
 		line = '';
 	}
 
-	errstr = errstr.replace(/\n/g, "<br>")
-	errstr = errstr.replace(" ", "&nbsp;")
+	errstr = errstr.replace(/\n/g, "<br>");
+	errstr = errstr.replace(" ", "&nbsp;");
 
-	var err = $("<div class='entry error error_"+realm+"'><div class='tab realm_" + realm + "'></div>" + errstr + "<div class=location>" + $.trim(line) + "</div><div class='stack realm_" + realm + "'><table></table></div></div>");
-	err.attr( "original", original+realm );
-
-	$(err).click(function(e) { $(e.srcElement).find('.stack').toggle() });
-	$(err).find('.stack').hide()
+	var err = $("<div class='entry error error_" + realm + "'><div class='tab realm_" + realm + "'></div>" + errstr + "<div class=location>" + $.trim(line) + "</div><div class='stack realm_" + realm + "'><table></table></div></div>");
+	err.attr( "original", original + realm );
 	
-	$('#console').append( err );
+	$('#console').append(err);
+
+	//$(err).click(onErrorClick);
+	$(err).click( function()
+	{
+		if ($(err).find('.stack TABLE').children().length > 0)
+			$(err).find('.stack').toggle(600);
+	});
+
+	$(err).find('.stack').hide();
 
 	LineCount++;
 	Trim();
 	ScrollToBottom();
+
+	return true;
 }
 
-function AddStack(id, line, func, file) 
+function AddStack(id, line, type, func, file) 
 {
-	//if (file == "[C]") file = "C++"
-	//if ( func == "") func = "Unknown"
-	
-	// Don't add to the stack if we're repeating..
-	//{
-		var str = $('.error:last .tab').html();
-		if ( str != "" ) return;
-	//}
-
-	if (line > 0)
-		line = "Line " + line
-	else
-		line = ""
-	
-	var err = $('.error:last .stack TABLE')
-	err.append( "<tr><td><b>"+func+"</b></td><td>"+file+"</td><td>"+line+"</td></tr>" )
+	$('.error:last .stack TABLE').append("<tr><td>" + type + " <b>" + func + "</b></td><td>" + file + "</td><td>" + line + "</td></tr>");
 }
 		</script>
 	</head>
@@ -338,7 +355,7 @@ end
 
 function PANEL:LuaError(realm, err, stack)
 	if self:Ready() then
-		local location = "unknown"
+		local location, js = "unknown"
 
 		for i = 1, #stack do
 			if stack[i].source ~= "[C]" then
@@ -347,12 +364,34 @@ function PANEL:LuaError(realm, err, stack)
 			end
 		end
 
-		local js = format("LuaError(\"%s\",\"%s\");", realm:JavascriptSafe(), ("[" .. location .. "] " .. err):JavascriptSafe())
+		if #stack > 0 then
+			local comp = {
+				format("if (LuaError(\"%s\",\"%s\")){", 
+					realm:JavascriptSafe(), 
+					("[" .. location .. "] " .. err):JavascriptSafe()
+				)
+			}
 
-		for i = 1, #stack do
-			local step = stack[i]
+			for i = 1, #stack do
+				local step = stack[i]
 
-			js = js .. format("AddStack(%i,%i,\"%s\",\"%s\");", i, (step.currentline or step.linedefined), (step.name or step.func or step.what or step.namewhat):JavascriptSafe(), (step.file or step.source):JavascriptSafe())
+				comp[#comp+1] = format("AddStack(%i,%i,\"%s\",\"%s\",\"%s\");",
+					i,
+					(step.currentline or step.linedefined),
+					(step.namewhat or ""):JavascriptSafe(),
+					(step.name or step.func):JavascriptSafe(), 
+					(step.file or step.source or step.short_src or step.what):JavascriptSafe()
+				)
+			end
+
+			comp[#comp+1] = "}"
+
+			js = concat(comp)
+		else
+			js = format("LuaError(\"%s\",\"%s\");", 
+				realm:JavascriptSafe(), 
+				("[" .. location .. "] " .. err):JavascriptSafe()
+			)
 		end
 
 		self:RunJavascript(js)

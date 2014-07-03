@@ -1,4 +1,6 @@
 local DecodeClientsideErrorString = RelC.Utils.DecodeClientsideErrorString
+local find = string.find
+local type, tostring, pcall, hook = type, tostring, pcall, hook
 
 
 
@@ -48,25 +50,47 @@ if hasLuaError then
 	local catching, queue = false, RelC.Queue(20)
 
 	hook.Add("LuaError", "Relay Console", function(serverside, err, stack)
-		--[[if not stack then
-			print("stack is ", type(stack), " ", tostring(stack))
-			local _stack, _thesaurus, _newthesaurus = RelC.Utils.AcquireStack(3)
-			stack = _stack
-		end--]]
+		--	Making sure stuff is alright.
 
 		if type(err) ~= "string" or (stack ~= nil and type(stack) ~= "table") then
 			MsgC(Color(255, 0, 0), "Messed up error: ")
 			MsgN("(", type(err), ") ", tostring(err), " - ", "(", type(stack), ") ", tostring(stack))
 
+			--	This kind of errors are bogus - not actual errors.
+
 			return
 		elseif stack == nil then
-			stack = {}
+			stack = {}--RelC.Utils.AcquireStack(2, true)
 		end
+
+		--	Fixing possible problems...
+
+		local a, b, source, line, errstr = find(err, "(.+):([%-%d]+): (.+)")
+
+		if a == 1 and b == #err and type(errstr) == "string" and #errstr > 0 then
+			err = errstr
+
+			if #stack == 0 then
+				stack[1] = {
+					source = source,
+					currentline = tonumber(line),
+					name = "unknown; inferred"
+				}
+
+				stack[2] = {
+					source = "MISSING STACK INFORMATION!",
+					currentline = -1,
+					name = "unknown"
+				}
+			end
+		end
+
+		--	Preventing recursive errors.
 
 		if catching then
 			queue:Queue({ err, stack })
 
-			MsgC(Color(255, 0, 0), "Capture error that would cause infinite recursion:\n")
+			MsgC(Color(255, 0, 0), "Captured error that would cause infinite recursion:\n")
 			PrintTable({ err, stack })
 		else
 			catching = true
