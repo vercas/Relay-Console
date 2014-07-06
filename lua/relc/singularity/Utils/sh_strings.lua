@@ -1,4 +1,4 @@
-local find, sub = string.find, string.sub
+local find, sub, match, gmatch = string.find, string.sub, string.match, string.gmatch
 local tonumber, error = tonumber, error
 
 
@@ -21,11 +21,10 @@ function RelC.Utils.SplitByLines(txt)
 	return pieces
 end
 
-local match, gmatch = string.match, string.gmatch
 function RelC.Utils.DecodeClientsideErrorString(txt)
 	local stack, err = {}, ""
 
-	local path, line, errmsg, stacktrace = match( str, "%[ERROR%] (.-):(.-):%s*(.-)\n*%s*(.+)$" )
+	local path, line, errmsg, stacktrace = match(txt, "%[ERROR%] (.-):(.-):%s*(.-)\n*%s*(.+)$")
 
 	if not path or not line or not errmsg or not stacktrace then
 		error("Text given does not contain a valid/known error string!")
@@ -41,7 +40,7 @@ function RelC.Utils.DecodeClientsideErrorString(txt)
 
 	err = errmsg
 
-	for funcname, path, line in gmatch( stacktrace, "%s*%d+%. *(.-) *%- *(.-):(.-)\n" ) do
+	for funcname, path, line in gmatch(stacktrace, "%s*%d+%. *(.-) *%- *(.-):(.-)\n") do
 		stack[#stack+1] = {
 			source = path,
 			currentline = tonumber(line),
