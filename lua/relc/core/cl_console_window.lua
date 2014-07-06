@@ -1,6 +1,12 @@
-local ScrW, ScrH = ScrW, ScrH
+local surface = surface
 local Create = vgui.Create
 local MousePos = gui.MousePos
+local LEFT, RIGHT, TOP, BOTTOM, NODOCK, FILL = LEFT, RIGHT, TOP, BOTTOM, NODOCK, FILL
+
+
+
+local min_w, min_h = 300, 300
+local minimized_h = 22
 
 
 
@@ -84,9 +90,6 @@ local PANEL = { }
 
 
 function PANEL:Init()
-	--self:SetSkin("vAdmin skin")
-	--	Good looks. 
-
 	local oldSV = self.SetVisible
 
 	self.SetVisible = function(this, b)
@@ -101,10 +104,10 @@ function PANEL:Init()
 
 	self:SetSizable(true)
 	self:SetDeleteOnClose(false)
-	self:SetMinWidth(300)
-	self:SetMinHeight(300)
+	self:SetMinWidth(min_w)
+	self:SetMinHeight(min_h)
 
-	local tabs_left_offset = 32
+	local tabs_left_offset = 24
 
 	if self.SetTitleVisible then
 		self:SetTitleVisible(false)
@@ -115,6 +118,11 @@ function PANEL:Init()
 
 		tabs_left_offset = 6
 	end
+
+	if self.SetScreenLock then self:SetScreenLock(true) end
+
+	if self.SetMaximizeButtonEnabled then self:SetMaximizeButtonEnabled(true) end
+	if self.SetMinimizeButtonEnabled then self:SetMinimizeButtonEnabled(true) end
 
 	self:DockPadding(5, 5, 5, 5)
 
@@ -128,14 +136,15 @@ function PANEL:Init()
 	end--]]
 
 	tabs.tabScroller:Dock(TOP)
-	tabs.tabScroller:DockMargin(tabs_left_offset - 5 + 4, 0, 31 * 3 + 4, 0)
 
 	self.tabs = tabs
 
 	if self:GetSkin() and self:GetSkin().Name == "vAdmin skin" then
-		tabs:DockMargin(-4, -1, -4, -4)
+		tabs.tabScroller:DockMargin(tabs_left_offset - 5 + 4, 1, (16 + 4) * 3 + 4, 0)
+		tabs:DockMargin(-4, -2, -4, -4)
 	else
-		tabs:DockMargin(-5, -1, -5, -5)
+		tabs.tabScroller:DockMargin(tabs_left_offset - 5 + 4, 1, 31 * 3 + 4, 0)
+		tabs:DockMargin(-5, -2, -5, -5)
 	end
 
 	tabs:Dock(FILL)
@@ -146,7 +155,7 @@ function PANEL:Init()
 	self.ErrSv = Create("RelC_Server_Errors_Panel", self)
 	tabs:AddSheet("Server Errors", self.ErrSv, "icon16/error.png")
 
-	self:SetSize(ScrW() * 0.6, ScrH() * 0.7)
+	self:SetSize(surface.ScreenWidth() * 0.6, surface.ScreenHeight() * 0.7)
 	--self:SetPos(ScrW() * 0.4 - 50, 50)
 	self:SetPos(50, 50)
 
@@ -155,13 +164,27 @@ function PANEL:Init()
 
 	self.oldmi = true
 
+	self.minimized = false
+	self.maximized = false
+
+	--	Preppending to the existing Think function.
+
 	self.OldThink = self.Think
 
 	function self:Think()
 		ThinkMovement(self)
 
 		self:OldThink()
+
+		self:OnThink()
 	end
+
+	--	Extra buttons.
+
+	local btnStrip = Create("RelC_Console_Window_Buttons", tabs.tabScroller)
+
+	btnStrip:DockMargin(0, 0, 4, 12)
+	btnStrip:Dock(RIGHT)
 end
 
 function PANEL:OnVisible()
@@ -172,6 +195,99 @@ end
 
 function PANEL:OnClose()
 	--	Should save position and size and active tab?
+end
+
+function PANEL:Place()
+	if self.minimized then
+		self.boundsForMinimize = { 0, 0, 0, 0, self.boundsForMaximize and true }
+		self.boundsForMinimize[1], self.boundsForMinimize[2] = self:GetPos()
+		self.boundsForMinimize[3], self.boundsForMinimize[4] = self:GetSize()
+		--	[5] = was maximized before
+
+		self.tabs:SetVisible(false)
+		self:SetMinHeight(minimized_h)
+		self:SetTall(minimized_h)
+		self:SetSizable(false)
+		self:SetDraggable(false)
+		self:Dock(TOP)
+
+		if self.SetMaximizeButtonEnabled then self:SetMaximizeButtonEnabled(false) end
+	elseif self.maximized then
+		if not self.boundsForMaximize then
+			self.boundsForMaximize = { 0, 0, 0, 0 }
+			self.boundsForMaximize[1], self.boundsForMaximize[2] = self:GetPos()
+			self.boundsForMaximize[3], self.boundsForMaximize[4] = self:GetSize()
+		end
+
+		self.tabs:SetVisible(true)
+		self:SetMinHeight(min_h)
+		self:SetSizable(false)
+		self:SetDraggable(false)
+		self:Dock(FILL)
+
+		if self.SetMaximizeButtonEnabled then self:SetMaximizeButtonEnabled(true) end
+
+		self.boundsForMinimize = nil
+	else
+		self:Dock(NODOCK)
+		self:SetDraggable(true)
+		self:SetSizable(true)
+		self:SetMinHeight(min_h)
+		self.tabs:SetVisible(true)
+
+		if self.SetMaximizeButtonEnabled then self:SetMaximizeButtonEnabled(true) end
+
+		if self.boundsForMinimize then
+			self:SetPos(self.boundsForMinimize[1], self.boundsForMinimize[2])
+			self:SetSize(self.boundsForMinimize[3], self.boundsForMinimize[4])
+		elseif self.boundsForMaximize then
+			self:SetPos(self.boundsForMaximize[1], self.boundsForMaximize[2])
+			self:SetSize(self.boundsForMaximize[3], self.boundsForMaximize[4])
+		end
+
+		self.boundsForMaximize = nil
+		self.boundsForMinimize = nil
+	end
+
+	self:InvalidateLayout(true)
+end
+
+function PANEL:OnMaximized()
+	self.maximized = not self.maximized
+
+	self:Place()
+end
+
+function PANEL:OnMinimized()
+	self.minimized = not self.minimized
+
+	self:Place()
+end
+
+function PANEL:OnThink()
+	if self:GetDock() == FILL then
+		local x, y = self:GetPos()
+		local w, h = self:GetSize()
+		local sw, sh = surface.ScreenWidth(), surface.ScreenHeight()
+
+		if x ~= 0 or y ~= 0 or w ~= sw or h ~= sh then
+			self:SetPos(0, 0)
+			self:SetSize(sw, sh)
+
+			x, y, w, h = 0, 0, sw, sh
+		end
+	elseif self:GetDock() == RIGHT then
+		local x, y = self:GetPos()
+		local w, h = self:GetSize()
+		local sw, sh = surface.ScreenWidth(), surface.ScreenHeight()
+
+		if x ~= 0 or y ~= 0 or w ~= sw or h ~= minimized_h then
+			self:SetPos(0, 0)
+			self:SetSize(sw, minimized_h)
+
+			x, y, w, h = 0, 0, sw, minimized_h
+		end
+	end
 end
 
 
@@ -212,7 +328,10 @@ local function _check()
 
 		if isVis then
 			con:Show()
-			con:MakePopup()
+
+			if not con.minimized then
+				con:MakePopup()
+			end
 		else
 			con:Close()
 		end

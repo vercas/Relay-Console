@@ -218,3 +218,8 @@ pip-log.txt
 .SyncID
 .SyncIgnore
 .Sync_Archive/
+
+#Meh
+/lua/relc/core/cl_0_vframe.lua
+/lua/relc/core/cl_1_skin.lua
+/materials
