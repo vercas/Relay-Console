@@ -27,7 +27,7 @@ function RelC.Utils.DecodeClientsideErrorString(txt)
 	local path, line, errmsg, stacktrace = match(txt, "%[ERROR%] (.-):(.-):%s*(.-)\n*%s*(.+)$")
 
 	if not path or not line or not errmsg or not stacktrace then
-		error("Text given does not contain a valid/known error string!")
+		error("Text given does not contain a valid/known error string! path: " .. tostring(path) .. "; line: " .. tostring(line) .. "; errmsg: " .. tostring(errmsg) .. "; stacktrace: " .. tostring(stacktrace) .. "; txt: " .. tostring(txt))
 	end
 
 	--[[ uncomment this if you want to include the first error in the returned table

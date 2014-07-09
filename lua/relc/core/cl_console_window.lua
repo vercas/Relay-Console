@@ -155,6 +155,8 @@ function PANEL:Init()
 	self.ErrSv = Create("RelC_Server_Errors_Panel", self)
 	tabs:AddSheet("Server Errors", self.ErrSv, "icon16/error.png")
 
+	RelC.Hooks.Call.PopulateTabs(tabs)
+
 	self:SetSize(surface.ScreenWidth() * 0.6, surface.ScreenHeight() * 0.7)
 	--self:SetPos(ScrW() * 0.4 - 50, 50)
 	self:SetPos(50, 50)
