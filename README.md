@@ -23,7 +23,7 @@ The [ulx group permissions menu](https://hostr.co/spJgT4MnCrbg) or the correspon
 I highly recommend tuning these permissions and being careful with the spew/errors. They might contain information that isn't for all eyes.
 
 ## Requirements
-- Optional; to view errors: [gm_luaerror2](http://s.vercas.com/hdqvx) (cannot find original);
+- Optional; to view errors: [gm_luaerror](https://bitbucket.org/danielga/gm_luaerror/downloads);
 - Optional; to capture all the engine spew: [gm_enginespew](http://christopherthorne.googlecode.com/svn/trunk/gm_enginespew/Release/).
 
 Make sure you rename the module(s) appropriately when necessary.
