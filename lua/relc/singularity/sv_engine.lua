@@ -47,33 +47,34 @@ if hasEngineSpew then
 end
 
 if hasLuaError then
-	if luaerror == nil then
-		-- Nothing to do here, bad module.
+	if luaerror == nil or luaerror.VersionNum < 10200 then
+		-- Nothing to do here, bad/old module.
 
+		MsgC(Color(255, 0, 0), "Bad/outdated gm_luaerror module.")
 		return
 	end
 
-	-- Enable all the detours to provide the same functionality as gm_luaerror.
+	-- Enable all the detours to provide the same functionality as gm_luaerror2.
 
 	luaerror.EnableRuntimeDetour(true)
 	luaerror.EnableCompiletimeDetour(true)
 	luaerror.EnableClientDetour(true)
 
-	hook.Add("LuaError", "Relay Console", function(isruntime, file, line, err, stack)
-		-- Simulate Garry's Mod behavior if it's a compiletime error and stack is empty.
+	hook.Add("LuaError", "Relay Console", function(isruntime, errstr, file, line, err, stack)
+		-- Complete compiletime errors stack.
 
-		if not isruntime and #stack == 0 then
-			stack[1] = {
+		if not isruntime then
+			table.insert(stack, 1, {
+				name = "unknown",
 				source = file,
-				currentline = line,
-				name = "unknown"
-			}
+				currentline = line
+			})
 		end
 
 		hook_luaErrorSV(err, stack)
 	end)
 
-	hook.Add("ClientLuaError", "Relay Console", function(ply, file, line, err, stack)
-		hook_luaErrorCL(ply, err, stack)
+	hook.Add("ClientLuaError", "Relay Console", function(ply, errstr, file, line, err, stack)
+		hook_luaErrorCL(ply, err or errstr, stack)
 	end)
 end
