@@ -24,10 +24,13 @@ end
 function RelC.Utils.DecodeClientsideErrorString(txt)
 	local stack, err = {}, ""
 
-	local path, line, errmsg, stacktrace = match(txt, "%[ERROR%] (.-):(.-):%s*(.-)\n*%s*(.+)$")
+	local path, line, errmsg, stacktrace = match(txt, "^([^:]+):([^:]+):%s+([^\n]+)(.+)$")
 
 	if not path or not line or not errmsg or not stacktrace then
-		error("Text given does not contain a valid/known error string! path: " .. tostring(path) .. "; line: " .. tostring(line) .. "; errmsg: " .. tostring(errmsg) .. "; stacktrace: " .. tostring(stacktrace) .. "; txt: " .. tostring(txt))
+		-- If we can't find a pattern, return the string we received.
+		-- This supports ErrorNoHalt and friends.
+
+		return txt, stack
 	end
 
 	--[[ uncomment this if you want to include the first error in the returned table
@@ -40,7 +43,7 @@ function RelC.Utils.DecodeClientsideErrorString(txt)
 
 	err = errmsg
 
-	for funcname, path, line in gmatch(stacktrace, "%s*%d+%. *(.-) *%- *(.-):(.-)\n") do
+	for funcname, path, line in gmatch(stacktrace, "%s+%d+%.%s+([^%s]+)%s+%-%s+([^:]+):([^\n]+)") do
 		stack[#stack+1] = {
 			source = path,
 			currentline = tonumber(line),
